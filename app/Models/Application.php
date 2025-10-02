@@ -18,6 +18,13 @@ class Application extends Model
 
     public function tender()
     {
-        return $this->belongsTo(Tender::class);
+        return $this->belongsTo(\App\Models\Tender::class, 'tender_id');
     }
+    
+
+public function user()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
+
 }

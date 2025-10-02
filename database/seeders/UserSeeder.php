@@ -10,23 +10,25 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Admin user
-        User::firstOrCreate(
+        // Admin
+        User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'role' => 'admin'
+                'password' => Hash::make('password'), // change for production
+                'role' => 'admin',
+                'email_verified_at' => now(),
             ]
         );
 
         // Normal user
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'user@example.com'],
             [
                 'name' => 'Normal User',
                 'password' => Hash::make('password'),
-                'role' => 'user'
+                'role' => 'user',
+                'email_verified_at' => now(),
             ]
         );
     }

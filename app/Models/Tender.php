@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Tender extends Model
 {
@@ -17,15 +17,20 @@ class Tender extends Model
         'contact_person_name',
         'contact_person_number',
         'contact_email',
+        'user_id',
         'created_by',
         'status',
     ];
-    
-
-    protected $dates = ['last_date'];
 
     public function applications()
+{
+    return $this->hasMany(\App\Models\Application::class, 'tender_id');
+}
+
+
+    // Optional: who created the tender
+    public function creator()
     {
-        return $this->hasMany(Application::class);
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 }
