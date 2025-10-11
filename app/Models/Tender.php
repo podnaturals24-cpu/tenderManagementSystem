@@ -13,6 +13,8 @@ class Tender extends Model
         'name',
         'department',
         'last_date',
+        'pre_bid_date',       // ✅ NEW
+        'value_of_tender',    // ✅ NEW
         'document_path',
         'contact_person_name',
         'contact_person_number',

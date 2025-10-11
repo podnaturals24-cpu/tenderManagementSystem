@@ -36,6 +36,7 @@ Route::get('/tenders/{tender}', [\App\Http\Controllers\Admin\TenderController::c
 
     // post admin "create user" action
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
+
 });
 
 Route::get('/dashboard', [TenderController::class, 'dashboard'])
@@ -127,6 +128,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('can:register-users');
     Route::get('/tenders/create', [TenderController::class, 'create'])->name('tenders.create');
     Route::post('/tenders', [TenderController::class, 'store'])->name('tenders.store');
+    
     Route::get('/tenders', [TenderController::class, 'index'])->name('tenders.index');
     Route::get('/tenders/{tender}', [TenderController::class, 'show'])->name('tenders.show');
     Route::get('/tenders/{tender}/download', [TenderController::class, 'downloadDocument'])->name('tenders.download');

@@ -34,6 +34,8 @@ class TenderController extends Controller
             'name' => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'last_date' => 'required|date',
+            'pre_bid_date' => 'required|date',  // ✅ new field
+            'value_of_tender' => 'required|string', // ✅ new field (longtext)
             'document' => 'nullable|file|max:10240',
             'contact_person_name' => 'required|string|max:255',
             'contact_person_number' => 'required|string|max:50',
@@ -58,6 +60,9 @@ class TenderController extends Controller
         // Redirect back to dashboard (or show page) with success message
         return redirect()->route('user.dashboard')->with('success', 'Tender created successfully!');
     }
+
+
+    
 
     /**
      * Index - show tenders.

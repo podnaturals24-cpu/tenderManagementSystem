@@ -1,6 +1,5 @@
 <x-app-layout>
 
-
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8" x-data="{ open: false }">
 
         {{-- Create Tender Panel --}}
@@ -26,33 +25,91 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block">Tender Name</label>
-                            <input type="text" name="name" class="w-full border rounded p-2" required>
+                            <input type="text" name="name" value="{{ old('name') }}" class="w-full border rounded p-2" required>
+                            @error('name') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block">Department</label>
-                            <input type="text" name="department" class="w-full border rounded p-2" required>
+                            <input type="text" name="department" value="{{ old('department') }}" class="w-full border rounded p-2" required>
+                            @error('department') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block">Last Date</label>
-                            <input type="date" name="last_date" class="w-full border rounded p-2" required>
+                            <input type="date" name="last_date" value="{{ old('last_date') }}" class="w-full border rounded p-2" required>
+                            @error('last_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
+
+                        {{-- ✅ Expiry Date --}}
+                        <div>
+                            <label class="block">Expiry Date</label>
+                            <input type="date" name="expiry_date" value="{{ old('expiry_date') }}" class="w-full border rounded p-2" required>
+                            @error('expiry_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- ✅ Pre-Bid Date --}}
+                        <div>
+                            <label class="block">Pre-Bid Date</label>
+                            <input type="datetime-local" name="pre_bid_date" value="{{ old('pre_bid_date') }}" class="w-full border rounded p-2" required>
+                            @error('pre_bid_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- ✅ Value of Tender --}}
+                        <div>
+                            <label class="block">Value of Tender</label>
+                            <textarea name="value_of_tender" rows="3" class="w-full border rounded p-2" required>{{ old('value_of_tender') }}</textarea>
+                            @error('value_of_tender') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- ✅ Technical Criteria --}}
+                        <div>
+                            <label class="block">Technical Criteria</label>
+                            <textarea name="tech_criteria" rows="3" class="w-full border rounded p-2" required>{{ old('tech_criteria') }}</textarea>
+                            @error('tech_criteria') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- ✅ Technical Eligibility (use exact DB column name) --}}
+                        <div>
+                            <label class="block">Technical Eligibility</label>
+                            <textarea name="tech_eligibilty" rows="3" class="w-full border rounded p-2" required>{{ old('tech_eligibilty') }}</textarea>
+                            @error('tech_eligibilty') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- ✅ Financial Criteria --}}
+                        <div>
+                            <label class="block">Financial Criteria</label>
+                            <textarea name="fin_criteria" rows="3" class="w-full border rounded p-2" required>{{ old('fin_criteria') }}</textarea>
+                            @error('fin_criteria') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- ✅ Details of EMD --}}
+                        <div>
+                            <label class="block">Details of EMD</label>
+                            <textarea name="details_of_emd" rows="3" class="w-full border rounded p-2" required>{{ old('details_of_emd') }}</textarea>
+                            @error('details_of_emd') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
                         <div>
                             <label class="block">Contact Person Name</label>
-                            <input type="text" name="contact_person_name" class="w-full border rounded p-2" required>
+                            <input type="text" name="contact_person_name" value="{{ old('contact_person_name') }}" class="w-full border rounded p-2" required>
+                            @error('contact_person_name') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block">Contact Number</label>
-                            <input type="text" name="contact_person_number" class="w-full border rounded p-2" required>
+                            <input type="text" name="contact_person_number" value="{{ old('contact_person_number') }}" class="w-full border rounded p-2" required>
+                            @error('contact_person_number') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block">Contact Email</label>
-                            <input type="email" name="contact_email" class="w-full border rounded p-2" required>
+                            <input type="email" name="contact_email" value="{{ old('contact_email') }}" class="w-full border rounded p-2" required>
+                            @error('contact_email') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block">Upload Document</label>
                             <input type="file" name="document" class="w-full border rounded p-2">
+                            @error('document') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
+
                     <div class="mt-6 flex gap-2">
                         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
                             Submit Tender
@@ -68,12 +125,42 @@
         {{-- WRAP: hide the lists when open is true --}}
         <div x-show="!open" x-cloak>
 
-            {{-- If there are any tenders -> show All Tenders --}}
+            {{-- If there are any tenders -> show All/Approved switchable --}}
             @if(isset($tenders) && $tenders->count())
+
+                @php
+                    // Active tab from query: 'all' (default) or 'approved'
+                    $active = request('filter', 'all');
+                    // Build URLs preserving other query params
+                    $allUrl = request()->fullUrlWithQuery(['filter' => null]);
+                    $approvedUrl = request()->fullUrlWithQuery(['filter' => 'approved']);
+                    // Filter the collection in Blade (client-side). For large lists, move to controller.
+                    $filteredTenders = ($active === 'approved')
+                        ? $tenders->where('status', 'approved')->values()
+                        : $tenders;
+                @endphp
+
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <h3 class="text-lg font-bold mb-4">All Tenders</h3>
-                        <p class="mb-4">Total tenders: {{ $tenders->count() }}</p>
+
+                        {{-- Tabs header --}}
+                        <div class="flex items-center justify-between mb-4">
+                            <a href="{{ $allUrl }}"
+                               class="text-lg font-bold {{ $active === 'all' ? 'text-blue-600 underline' : 'text-gray-700 hover:text-blue-600' }}">
+                                All Tenders
+                            </a>
+                            <a href="{{ $approvedUrl }}"
+                               class="text-lg font-bold {{ $active === 'approved' ? 'text-blue-600 underline' : 'text-gray-700 hover:text-blue-600' }}">
+                                Approved Tenders
+                            </a>
+                        </div>
+
+                        <p class="mb-4">
+                            <span class="font-semibold">
+                                {{ $active === 'approved' ? 'Approved Tenders' : 'All Tenders' }}
+                            </span>
+                            — Total: {{ $filteredTenders->count() }}
+                        </p>
 
                         <div class="overflow-x-auto">
                             <table class="min-w-full border border-gray-300 dark:border-gray-700 text-sm">
@@ -88,7 +175,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($tenders as $tender)
+                                    @forelse($filteredTenders as $tender)
                                         <tr>
                                             <td class="px-4 py-2 border">{{ $tender->name }}</td>
                                             <td class="px-4 py-2 border">{{ $tender->department }}</td>
@@ -105,7 +192,13 @@
                                                 @endif
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="px-4 py-4 text-center text-gray-600">
+                                                No tenders found for this filter.
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
