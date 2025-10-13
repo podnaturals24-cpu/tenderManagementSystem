@@ -36,7 +36,6 @@ Route::get('/tenders/{tender}', [\App\Http\Controllers\Admin\TenderController::c
 
     // post admin "create user" action
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
-
 });
 
 Route::get('/dashboard', [TenderController::class, 'dashboard'])
@@ -46,73 +45,6 @@ Route::get('/dashboard', [TenderController::class, 'dashboard'])
 Route::get('/userdashboard', [TenderController::class, 'userDashboard'])
     ->middleware(['auth', 'verified'])
     ->name('user.dashboard');
-
-// Route::get('/dashboard', function () {
-//     $userId = auth()->id();
-
-//     $applications = Application::with('tender')
-//         ->where('user_id', $userId)
-//         ->get();
-
-//     // tenders created by the user
-//     $myTenders = Tender::where('created_by', $userId)
-//         ->orderBy('created_at', 'desc')
-//         ->get();
-    
-
-//     // determine admin status - adjust check if you use a different field (is_admin, type, etc.)
-//   $user = auth()->user();
-
-// // $role = $user->role ?? null;
-
-// // dd($user->role === 'admin');
-
-//     $isAdmin = $user->role === 'admin';
-
-    
-
-//     if ($isAdmin) {
-//         // admin sees everything
-//         $tenders = Tender::orderBy('created_at', 'desc')->get();
-//         //dd($tenders);
-//     } else {
-//         // build list of tender ids from applications (safe: returns a Collection)
-//         $tenderIds = $applications->pluck('tender_id')->unique()->filter()->values();
-
-//         $tenders = Tender::where('user_id', $userId)
-//         ->orderBy('created_at', 'desc')
-//         ->get();
-//         //dd($tenderIds);
-
-//         if ($tenderIds->isEmpty()) {
-//             // OPTION A (recommended): show all tenders except Disapproved for normal users
-//             $tenders = Tender::where('user_id', $userId)
-//             ->orderBy('created_at', 'desc')
-//             ->get();
-           
-
-//             // OPTION B (alternative): show no tenders when user hasn't applied to any:
-//             // $tenders = collect();
-//         } else {
-//             // show only tenders the user applied for AND not disapproved
-//             $tenders = Tender::whereIn('id', $tenderIds)
-//                 ->where('status', '!=', 'Disapproved')
-//                 ->orderBy('created_at', 'desc')
-//                 ->get();
-
-            
-//         }
-//     }
-
-//     return view('dashboard', compact('applications', 'myTenders', 'tenders'));
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-
-
-
-
-
-
 
 
 // ✅ Tender routes (needed for create/store form in dashboard)
@@ -128,10 +60,13 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('can:register-users');
     Route::get('/tenders/create', [TenderController::class, 'create'])->name('tenders.create');
     Route::post('/tenders', [TenderController::class, 'store'])->name('tenders.store');
-    
     Route::get('/tenders', [TenderController::class, 'index'])->name('tenders.index');
     Route::get('/tenders/{tender}', [TenderController::class, 'show'])->name('tenders.show');
     Route::get('/tenders/{tender}/download', [TenderController::class, 'downloadDocument'])->name('tenders.download');
+    Route::post('/tenders/{id}/update', [TenderController::class, 'updateTenderData'])->name('tenders.updateData');
+    Route::post('/tenders/{id}/updateStage', [TenderController::class, 'updateTenderEmdData'])->name('tenders.updateDataStage');
+    // ✅ Route for updating EMD-related details
+    
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

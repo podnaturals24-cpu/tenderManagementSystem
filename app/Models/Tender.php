@@ -22,6 +22,20 @@ class Tender extends Model
         'user_id',
         'created_by',
         'status',
+
+        // ✅ Added fields
+        'tech_criteria',
+        'tech_eligibilty',
+        'fin_criteria',
+        'fin_elegibility',
+        'tender_doucemnt_uploaded_date',
+        // ✅ Newly added fields
+        'details_of_emd',              // longtext
+        'emd_number',                  // int
+        'emd_date',                    // date
+        'expiry_date',                 // date
+        'tender_apply_status',         // varchar
+
     ];
 
     public function applications()
