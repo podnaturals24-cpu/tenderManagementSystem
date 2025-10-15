@@ -39,7 +39,6 @@
                 this.form.name = t.name ?? ''
                 this.form.department = t.department ?? ''
                 this.form.last_date = (t.last_date ?? '').toString().slice(0, 10)
-                this.form.expiry_date = (t.expiry_date ?? '').toString().slice(0, 10)
                 this.form.pre_bid_date = (t.pre_bid_date ?? '').toString().replace(' ', 'T')
                 this.form.value_of_tender = t.value_of_tender ?? ''
                 this.form.contact_person_name = t.contact_person_name ?? ''
@@ -113,12 +112,6 @@
                             @error('last_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 
-                        {{-- ✅ Expiry Date --}}
-                        <div>
-                            <label class="block">Expiry Date</label>
-                            <input type="date" name="expiry_date" value="{{ old('expiry_date') }}" class="w-full border rounded p-2" required>
-                            @error('expiry_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                        </div>
 
                         {{-- ✅ Pre-Bid Date --}}
                         <div>

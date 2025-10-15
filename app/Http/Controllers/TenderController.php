@@ -71,8 +71,7 @@ public function updateTenderData(Request $request, $id)
     $request->validate([
         'name' => ['required', 'string', 'max:255'],
         'department' => ['required', 'string', 'max:255'],
-        'last_date' => ['required', 'date'],
-        'expiry_date' => ['required', 'date'],                  // ✅ include expiry_date
+        'last_date' => ['required', 'date'],                  // ✅ include expiry_date
         // The browser sends datetime-local as "YYYY-MM-DDTHH:MM"
         // You can keep 'date' or be strict with date_format:Y-m-d\TH:i
         'pre_bid_date' => ['required', 'date'],
@@ -96,7 +95,6 @@ public function updateTenderData(Request $request, $id)
         'name',
         'department',
         'last_date',
-        'expiry_date',                          // ✅ now included
         'pre_bid_date',
         'value_of_tender',
         'contact_person_name',
@@ -151,7 +149,7 @@ public function updateTenderEmdData(Request $request, $id)
     // 2) Validate only the requested fields
     $request->validate([
         'details_of_emd' => ['nullable', 'string'],  // longtext
-        'emd_number'     => ['nullable', 'integer'], // int
+        'emd_number'     => ['nullable', 'digits_between:1,20'], // int
         'emd_date'       => ['nullable', 'date'],    // date (HTML <input type="date">)
         'expiry_date'    => ['nullable', 'date'],    // date (HTML <input type="date">)
     ]);
@@ -172,7 +170,7 @@ public function updateTenderEmdData(Request $request, $id)
 
 
     // 5) Redirect/flash
-    // return redirect()->back()->with('success', 'EMD & expiry details updated successfully.');
+    return redirect()->back()->with('success', 'EMD & expiry details updated successfully.');
 }
 
 
