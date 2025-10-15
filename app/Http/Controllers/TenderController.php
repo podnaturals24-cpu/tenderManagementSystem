@@ -132,11 +132,12 @@ public function updateTenderData(Request $request, $id)
         $path = $request->file('document')->store('tenders', 'public');
         $data['document_path'] = $path;
     }
-
     // 5) Update
     $tender->update($data);
-    $tender->approve_stage = 'second_stage_pending';
+    // $tender->approve_stage = 'second_stage_pending';
     $tender->save();
+
+    
 
     // 6) Redirect
     return redirect()->back()->with('success', 'Tender details updated successfully.');
@@ -171,7 +172,7 @@ public function updateTenderEmdData(Request $request, $id)
 
 
     // 5) Redirect/flash
-    return redirect()->back()->with('success', 'EMD & expiry details updated successfully.');
+    // return redirect()->back()->with('success', 'EMD & expiry details updated successfully.');
 }
 
 
