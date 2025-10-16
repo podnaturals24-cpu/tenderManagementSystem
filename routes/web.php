@@ -31,6 +31,7 @@ Route::get('/tenders/{tender}', [\App\Http\Controllers\Admin\TenderController::c
     // Optional: approve/disapprove endpoints (create controller below if you want these)
     Route::post('/tenders/{tender}/approve', [\App\Http\Controllers\Admin\TenderController::class, 'approve'])->name('tenders.approve');
     Route::post('/tenders/{tender}/disapprove', [\App\Http\Controllers\Admin\TenderController::class, 'disapprove'])->name('tenders.disapprove');
+    Route::get('/tenders/{tender}/download', [TenderController::class, 'download'])->name('tenders.download');
 
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 

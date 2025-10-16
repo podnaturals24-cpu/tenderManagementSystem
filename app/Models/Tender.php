@@ -22,6 +22,7 @@ class Tender extends Model
         'user_id',
         'created_by',
         'status',
+        'approve_stage',  
 
         // ✅ Added fields
         'tech_criteria',
@@ -37,6 +38,27 @@ class Tender extends Model
         'tender_apply_status',         // varchar
 
     ];
+
+    protected $casts = [
+        'last_date'   => 'datetime',
+        'expiry_date' => 'datetime',
+    ];
+
+    // Status
+    public const ST_PENDING     = 'pending';
+    public const ST_APPROVED    = 'approved';
+    public const ST_DISAPPROVED = 'disapproved';
+
+    // Stages
+    public const S2_PENDING   = 'second_stage_pending';
+    public const S2_APPROVED  = 'second_stage_approved';
+    public const S3_PENDING   = 'third_stage_pending';
+    public const S3_APPROVED  = 'third_stage_approved';
+
+    // Scopes
+    public function scopeSecondPending($q) { return $q->where('approve_stage', self::S2_PENDING); }
+    public function scopeThirdPending($q)  { return $q->where('approve_stage', self::S3_PENDING); }
+    
 
     public function applications()
 {

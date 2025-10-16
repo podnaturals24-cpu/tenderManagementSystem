@@ -38,8 +38,7 @@
                 this.form.id = t.id
                 this.form.name = t.name ?? ''
                 this.form.department = t.department ?? ''
-                this.form.last_date = t.last_date ?? ''
-                this.form.expiry_date = t.expiry_date ?? ''
+                this.form.last_date = (t.last_date ?? '').toString().slice(0, 10)
                 this.form.pre_bid_date = (t.pre_bid_date ?? '').toString().replace(' ', 'T')
                 this.form.value_of_tender = t.value_of_tender ?? ''
                 this.form.contact_person_name = t.contact_person_name ?? ''
@@ -113,12 +112,6 @@
                             @error('last_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 
-                        {{-- ✅ Expiry Date --}}
-                        <div>
-                            <label class="block">Expiry Date</label>
-                            <input type="date" name="expiry_date" value="{{ old('expiry_date') }}" class="w-full border rounded p-2" required>
-                            @error('expiry_date') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                        </div>
 
                         {{-- ✅ Pre-Bid Date --}}
                         <div>
@@ -185,6 +178,18 @@
                       :action="'{{ url('/tenders') }}/' + form.id + '/update'"
                       enctype="multipart/form-data">
                     @csrf
+
+                    @if ($errors->any())
+                    <div class="mb-4 p-3 rounded bg-red-50 text-red-700">
+                        <div class="font-semibold">Please fix the following:</div>
+                        <ul class="list-disc ml-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
 
                     <div class="space-y-4">
                         {{-- Readonly fields --}}
