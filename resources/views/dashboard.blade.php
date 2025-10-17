@@ -2,10 +2,20 @@
 <x-app-layout>
   <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-    {{-- Flash messages --}}
+    {{-- Flash / Errors --}}
     @if (session('success'))
       <div class="mb-4 bg-green-50 border border-green-200 text-green-800 rounded px-4 py-3">
         {{ session('success') }}
+      </div>
+    @endif
+    @if (session('info'))
+      <div class="mb-4 bg-blue-50 border border-blue-200 text-blue-800 rounded px-4 py-3">
+        {{ session('info') }}
+      </div>
+    @endif
+    @if (session('error'))
+      <div class="mb-4 bg-red-50 border border-red-200 text-red-800 rounded px-4 py-3">
+        {{ session('error') }}
       </div>
     @endif
     @if ($errors->any())
@@ -30,68 +40,76 @@
 
     {{-- Stats --}}
     @php
-      // If the controller provided $counts, use it; else compute from $tenders (if it's a Collection)
-      $total  = $counts['total']           ?? (isset($tenders) && method_exists($tenders, 'count') ? $tenders->count() : 0);
-      $firstA = $counts['approved_first']  ?? (isset($tenders) && method_exists($tenders, 'where') ? $tenders->where('status', 'approved')->count() : 0);
-      $secondP= $counts['second_pending']  ?? 0;
-      $thirdP = $counts['third_pending']   ?? 0;
-    @endphp
+      $total   = $counts['total']          ?? 0;
+      $firstA  = $counts['approved_first'] ?? 0;
+      $secondP = $counts['second_pending'] ?? 0;
+      $thirdP  = $counts['third_pending']  ?? 0;
 
-    <div class="overflow-x-auto mb-6">
-    <div class="flex flex-row min-w-[600px] bg-white dark:bg-gray-800 rounded shadow divide-x">
-        {{-- Total Tenders --}}
-        <div class="flex-1 p-4 text-center">
-            <div class="font-semibold text-gray-700 dark:text-gray-300">Total Tenders</div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $total }}</div>
-        </div>
-
-        {{-- First Approved --}}
-        <div class="flex-1 p-4 text-center">
-            <div class="font-semibold text-gray-700 dark:text-gray-300">First Approved</div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $firstA }}</div>
-        </div>
-
-        {{-- Second Pending --}}
-        <div class="flex-1 p-4 text-center">
-            <div class="font-semibold text-gray-700 dark:text-gray-300">Second Pending</div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $secondP }}</div>
-        </div>
-
-        {{-- Third Pending --}}
-        <div class="flex-1 p-4 text-center">
-            <div class="font-semibold text-gray-700 dark:text-gray-300">Third Pending</div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $thirdP }}</div>
-        </div>
-    </div>
-</div>
-
-
-    {{-- Tabs --}}
-    @php
       $active = $active ?? request('filter', 'all'); // 'all' | 'second' | 'third'
       $allUrl    = request()->fullUrlWithQuery(['filter' => 'all']);
       $secondUrl = request()->fullUrlWithQuery(['filter' => 'second']);
       $thirdUrl  = request()->fullUrlWithQuery(['filter' => 'third']);
     @endphp
 
+    <div class="overflow-x-auto mb-6">
+      <div class="flex flex-row min-w-[600px] bg-white dark:bg-gray-800 rounded shadow divide-x">
+        {{-- Total Tenders --}}
+        <div class="flex-1 p-4 text-center">
+          <div class="font-semibold text-gray-700 dark:text-gray-300">Total Tenders</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $total }}</div>
+        </div>
+        {{-- First Approved --}}
+        <div class="flex-1 p-4 text-center">
+          <div class="font-semibold text-gray-700 dark:text-gray-300">First Approved</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $firstA }}</div>
+        </div>
+        {{-- Second Pending --}}
+        <div class="flex-1 p-4 text-center">
+          <div class="font-semibold text-gray-700 dark:text-gray-300">Second Pending</div>
+          <a href="{{ $secondUrl }}" class="text-2xl font-bold text-blue-700 hover:underline">{{ $secondP }}</a>
+        </div>
+        {{-- Third Pending --}}
+        <div class="flex-1 p-4 text-center">
+          <div class="font-semibold text-gray-700 dark:text-gray-300">Third Pending</div>
+          <a href="{{ $thirdUrl }}" class="text-2xl font-bold text-blue-700 hover:underline">{{ $thirdP }}</a>
+        </div>
+      </div>
+    </div>
+
+    {{-- Tabs --}}
     <div class="flex items-center gap-6 mb-4">
       <a href="{{ $allUrl }}"
          class="font-bold {{ $active==='all' ? 'text-blue-600 underline' : 'hover:text-blue-600' }}">
         All Tenders
       </a>
-      {{-- You asked to name these hyperlinks “Second Stage Approved” and “Third Stage Approved”.
-           Functionally, they list items pending review at that stage so you can approve/disapprove. --}}
       <a href="{{ $secondUrl }}"
          class="font-bold {{ $active==='second' ? 'text-blue-600 underline' : 'hover:text-blue-600' }}">
-        Second Stage Approved
+        Second Stage Pending
       </a>
       <a href="{{ $thirdUrl }}"
          class="font-bold {{ $active==='third' ? 'text-blue-600 underline' : 'hover:text-blue-600' }}">
-        Third Stage Approved
+        Third Stage Pending
       </a>
     </div>
 
     {{-- Tenders Table --}}
+    @php
+      // Stage value to post with forms in this tab
+      $stageForForm = $active==='second' ? 'second' : ($active==='third' ? 'third' : 'first');
+
+      // Helpers
+      $fmtDate = function($d, $fallback = '—') {
+        if (!$d) return $fallback;
+        try {
+          return method_exists($d, 'format')
+              ? $d->format('Y-m-d')
+              : \Carbon\Carbon::parse($d)->format('Y-m-d');
+        } catch (\Throwable $e) {
+          return $fallback;
+        }
+      };
+    @endphp
+
     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
       <div class="p-4">
         <h3 class="font-bold mb-3">
@@ -119,16 +137,10 @@
               <tbody>
                 @foreach($tenders as $t)
                   @php
-                    // Which stage are we acting on in this tab?
-                    $stage = $active==='second' ? 'second' : ($active==='third' ? 'third' : 'first');
-
-                    $lastDate  = $t->last_date
-                      ? (method_exists($t->last_date, 'format') ? $t->last_date->format('Y-m-d') : \Carbon\Carbon::parse($t->last_date)->format('Y-m-d'))
-                      : 'N/A';
-
-                    $expiry    = $t->expiry_date
-                      ? (method_exists($t->expiry_date, 'format') ? $t->expiry_date->format('Y-m-d') : \Carbon\Carbon::parse($t->expiry_date)->format('Y-m-d'))
-                      : '—';
+                    $lastDate = $fmtDate($t->last_date, 'N/A');
+                    $expiry   = $fmtDate($t->expiry_date, '—');
+                    $status   = strtolower($t->status ?? '');
+                    $stageVal = $t->approve_stage ?? '—';
                   @endphp
                   <tr class="border-t">
                     <td class="px-3 py-2">
@@ -143,16 +155,15 @@
                     <td class="px-3 py-2">{{ $expiry }}</td>
                     <td class="px-3 py-2">
                       <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-900">
-                        {{ $t->approve_stage ?? '—' }}
+                        {{ $stageVal }}
                       </span>
                     </td>
                     <td class="px-3 py-2">
-                      @php $s = strtolower($t->status ?? ''); @endphp
-                      @if($s === 'approved')
+                      @if($status === 'approved')
                         <span class="px-2 py-1 text-xs rounded bg-green-500 text-white">Approved</span>
-                      @elseif($s === 'pending')
+                      @elseif($status === 'pending' || $status === '')
                         <span class="px-2 py-1 text-xs rounded bg-yellow-400 text-black">Pending</span>
-                      @elseif($s === 'disapproved' || $s === 'rejected')
+                      @elseif($status === 'disapproved' || $status === 'rejected')
                         <span class="px-2 py-1 text-xs rounded bg-red-600 text-white">Disapproved</span>
                       @else
                         <span class="px-2 py-1 text-xs rounded bg-gray-400 text-white">{{ ucfirst($t->status ?? 'N/A') }}</span>
@@ -160,19 +171,19 @@
                     </td>
                     <td class="px-3 py-2">
                       @if(!empty($t->document_path))
-                        <a href="{{ route('tenders.download', $t) }}" class="text-blue-600 hover:underline">Download</a>
+                        <a href="{{ route('admin.tenders.download', $t) }}" class="text-blue-600 hover:underline">Download</a>
                       @else
                         <span class="text-gray-500">No File</span>
                       @endif
                     </td>
-                    <td class="px-3 py-2">
+                    <td class="px-3 py-2 whitespace-nowrap">
                       {{-- Approve --}}
                       <form method="POST"
                             action="{{ route('admin.tenders.approve', $t) }}"
                             class="inline"
-                            onsubmit="this.querySelector('button').disabled=true; return confirm('Approve this {{ $stage }} stage?');">
+                            onsubmit="this.querySelector('button').disabled=true; return confirm('Approve this {{ $stageForForm }} stage?');">
                         @csrf
-                        <input type="hidden" name="stage" value="{{ $stage }}">
+                        <input type="hidden" name="stage" value="{{ $stageForForm }}">
                         <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded">Approve</button>
                       </form>
 
@@ -180,18 +191,18 @@
                       <form method="POST"
                             action="{{ route('admin.tenders.disapprove', $t) }}"
                             class="inline ml-2"
-                            onsubmit="this.querySelector('button').disabled=true; return confirm('Disapprove this {{ $stage }} stage?');">
+                            onsubmit="this.querySelector('button').disabled=true; return confirm('Disapprove this {{ $stageForForm }} stage?');">
                         @csrf
-                        <input type="hidden" name="stage" value="{{ $stage }}">
+                        <input type="hidden" name="stage" value="{{ $stageForForm }}">
                         <button type="submit" class="px-2 py-1 bg-red-600 text-white rounded">Disapprove</button>
                       </form>
 
-                      {{-- View --}}
+                      <!-- {{-- View --}}
                       <a href="{{ route('admin.tenders.show', $t) }}"
                          class="inline ml-2 text-sm text-blue-600 hover:underline"
                          title="View details">
                         View
-                      </a>
+                      </a> -->
                     </td>
                   </tr>
                 @endforeach
@@ -199,73 +210,58 @@
             </table>
           </div>
 
-          {{-- Pagination (if $tenders is a paginator) --}}
-          @if(method_exists($tenders, 'links'))
+          {{-- Pagination (LengthAwarePaginator / Paginator) --}}
+          @php
+            $isPaginator = $tenders instanceof \Illuminate\Contracts\Pagination\Paginator
+                        || $tenders instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator;
+          @endphp
+          @if($isPaginator)
             <div class="mt-4">
               {{ $tenders->links() }}
             </div>
           @endif
         @else
-          <p>No tenders found.</p>
-        @endif
+        <p class="text-gray-600">
+    @if($active==='second')
+      No tenders in Second Stage Pending.
+    @elseif($active==='third')
+      No tenders in Third Stage Pending.
+    @else
+      No tenders found.
+    @endif
+  </p>        @endif
       </div>
     </div>
 
-    {{-- Applications --}}
-    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-      <div class="p-4">
-        <h3 class="font-bold mb-3">Applications</h3>
-
-        @if(isset($applications) && $applications->count())
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead class="bg-gray-100 dark:bg-gray-700">
-                <tr>
-                  <th class="px-3 py-2 text-left">Tender</th>
-                  <th class="px-3 py-2 text-left">Applicant</th>
-                  <th class="px-3 py-2 text-left">Status</th>
-                  <th class="px-3 py-2 text-left">Applied At</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach($applications as $app)
-                  @php
-                    $appliedAt = $app->created_at
-                      ? (method_exists($app->created_at, 'format') ? $app->created_at->format('Y-m-d H:i') : \Carbon\Carbon::parse($app->created_at)->format('Y-m-d H:i'))
-                      : 'N/A';
-                    $ast = strtolower($app->status ?? '');
-                  @endphp
-                  <tr class="border-t">
-                    <td class="px-3 py-2">{{ optional($app->tender)->name ?? 'N/A' }}</td>
-                    <td class="px-3 py-2">{{ optional($app->user)->name ?? 'N/A' }}</td>
-                    <td class="px-3 py-2">
-                      @if($ast === 'approved')
-                        <span class="px-2 py-1 text-xs rounded bg-green-500 text-white">Approved</span>
-                      @elseif($ast === 'pending')
-                        <span class="px-2 py-1 text-xs rounded bg-yellow-400 text-black">Pending</span>
-                      @elseif($ast === 'rejected' || $ast === 'disapproved')
-                        <span class="px-2 py-1 text-xs rounded bg-red-600 text-white">Rejected</span>
-                      @else
-                        <span class="px-2 py-1 text-xs rounded bg-gray-400 text-white">{{ ucfirst($app->status ?? 'N/A') }}</span>
-                      @endif
-                    </td>
-                    <td class="px-3 py-2">{{ $appliedAt }}</td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
-
-          @if(method_exists($applications, 'links'))
-            <div class="mt-4">
-              {{ $applications->links() }}
-            </div>
-          @endif
-        @else
-          <p>No applications found.</p>
-        @endif
-      </div>
-    </div>
+  
 
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  @if (session('success'))
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: @json(session('success')),
+      confirmButtonText: 'OK'
+    }).then(() => {
+      // After OK, send them to the dashboard (or stay on the same page if you prefer)
+      window.location.href = "{{ route('dashboard') }}";
+    });
+  </script>
+@endif
+@if (session('error'))
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Action not allowed',
+      text: @json(session('error')),
+      confirmButtonText: 'OK'
+    }).then(() => {
+      window.location.href = "{{ route('dashboard') }}";
+    });
+  </script>
+@endif
+
+
 </x-app-layout>

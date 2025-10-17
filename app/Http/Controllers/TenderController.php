@@ -132,7 +132,7 @@ public function updateTenderData(Request $request, $id)
     }
     // 5) Update
     $tender->update($data);
-    // $tender->approve_stage = 'second_stage_pending';
+    $tender->approve_stage = 'second_stage_pending';
     $tender->save();
 
     
@@ -174,69 +174,7 @@ public function updateTenderEmdData(Request $request, $id)
 }
 
 
-
-
-
-    
-
-    /**
-     * Index - show tenders.
-     * Admins see all tenders, regular users see only approved tenders.
-     */
-    // public function index()
-    // {
-    //     $user = auth()->user();
-
-    //     if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
-    //         // Admin sees all tenders
-    //         $tenders = Tender::orderBy('last_date', 'asc')->get();
-    //     } else {
-    //         // Normal users: only approved tenders
-    //        // $tenders = Tender::where('status', 'approved')->orderBy('last_date', 'asc')->get();
-    //        $tenders = Tender::where('user_id', auth()->id())
-    //                      ->orderBy('last_date', 'asc')
-    //                      ->get();
-    //     }
-
-    //     return view('tenders.index', compact('tenders'));
-    // }
-
-// public function index()
-// {
-//     $user = auth()->user();
-
-//     // Debug: check the logged in user
-//     // dd($user); // uncomment this first to see full user object
-
-//     if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
-//         // Admin sees all tenders
-//         $tenders = Tender::orderBy('last_date', 'asc')->get();
-
-//         // Debug: check tenders list for admin
-//         // dd($tenders); 
-//     } else {
-//         // Regular user: show only tenders they created
-//         $tenders = Tender::where('user_id', auth()->id())
-//                          ->orderBy('last_date', 'asc')
-//                          ->get();
-
-//         // Debug: check tenders list for user
-//         // dd($tenders);
-//     }
-
-//     // Debug: see both user id and tenders together
-//     // dd([
-//     //     'auth_id' => auth()->id(),
-//     //     'user' => $user,
-//     //     'tenders' => $tenders
-//     // ]);
-
-//     return view('tenders.index', compact('tenders'));
-// }
-
-
-
-public function dashboard()
+public function dashboard(Request $request)
 {
     $user = Auth::user();
 
@@ -245,20 +183,41 @@ public function dashboard()
         abort(403, 'Unauthorized'); // or redirect()->route('user.dashboard');
     }
 
-    // Admin view: load all applications (with tender + applicant) and all tenders
-    $applications = Application::with(['tender', 'user'])
-        ->orderBy('created_at', 'desc')
-        ->get();
+      // ✅ Read filter from URL: ?filter=all|second|third
+    $active = $request->query('filter', 'all');
 
-    // All tenders (for admin)
-    $tenders = Tender::orderBy('created_at', 'desc')->get();
+    // Base query
+    $q = Tender::query()->latest('created_at');
 
-    // Optionally keep "myTenders" if you want to show tenders created by this admin user as well
-    $myTenders = Tender::where('created_by', $user->id)
-        ->orderBy('created_at', 'desc')
-        ->get();
+    // ✅ Pending-only filters per tab
+    switch ($active) {
+        case 'second':
+            $q->where('approve_stage', Tender::S2_PENDING);
+            break;
 
-    return view('dashboard', compact('applications', 'myTenders', 'tenders'));
+        case 'third':
+            $q->where('approve_stage', Tender::S3_PENDING);
+            break;
+
+        case 'all':
+        default:
+            // No stage filter (show everything)
+            break;
+    }
+
+    // Paginate + preserve query string
+    $tenders = $q->paginate(20)->withQueryString();
+
+    // Counts (pending-only for stage counts)
+    $counts = [
+        'total'          => Tender::count(),
+        'approved_first' => Tender::where('status', Tender::ST_APPROVED)->count(),
+        'second_pending' => Tender::where('approve_stage', Tender::S2_PENDING)->count(),
+        'third_pending'  => Tender::where('approve_stage', Tender::S3_PENDING)->count(),
+    ];
+
+
+    return view('dashboard', compact('tenders', 'active', 'counts'));
 }
 
 public function userDashboard()
